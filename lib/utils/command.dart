@@ -10,6 +10,7 @@ import 'result.dart';
 
 typedef CommandAction0<T> = Future<Result<T>> Function();
 typedef CommandAction1<T, A> = Future<Result<T>> Function(A);
+typedef CommandAction2<T, A, B> = Future<Result<T>> Function(A, B);
 
 /// Facilitates interaction with a ViewModel.
 ///
@@ -30,7 +31,7 @@ abstract class Command<T> extends ChangeNotifier {
   bool _running = false;
 
   /// True when the action is running.
-  bool get running => _running;
+  bool get isRunning => _running;
 
   Result<T>? _result;
 
@@ -100,5 +101,16 @@ class Command1<T, A> extends Command<T> {
   /// Executes the action with the argument.
   Future<void> execute(A argument) async {
     await _execute(() => _action(argument));
+  }
+}
+
+class Command2<T, A, B> extends Command<T> {
+  Command2(this._action);
+
+  final CommandAction2<T, A, B> _action;
+
+  /// Executes the action with the argument.
+  Future<void> execute(A argument, B argument2) async {
+    await _execute(() => _action(argument, argument2));
   }
 }

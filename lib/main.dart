@@ -4,6 +4,7 @@ import 'package:mymedia/router.dart';
 import 'package:mymedia/services/repositories/auth_repository.dart';
 import 'package:mymedia/services/repositories/remote/remote_api/remote_api.dart';
 import 'package:mymedia/services/repositories/remote/remote_auth_repository.dart';
+import 'package:mymedia/services/repositories/remote/remote_movies_repository.dart';
 import 'package:mymedia/services/shared_preferences_service.dart';
 import 'package:mymedia/ui/movies/movies_viewmodel.dart';
 import 'package:provider/provider.dart';
@@ -22,9 +23,12 @@ List<SingleChildWidget> get providers {
     remoteApi: remoteApi,
     sharedPreferencesService: sharedPreferencesService,
   );
+  final moviesRepository = RemoteMoviesRepository(remoteApi: remoteApi);
   return [
     ChangeNotifierProvider.value(value: authRepository as AuthRepository),
-    ChangeNotifierProvider.value(value: MoviesViewModel()),
+    ChangeNotifierProvider.value(
+      value: MoviesViewModel(moviesRepository: moviesRepository),
+    ),
   ];
 }
 

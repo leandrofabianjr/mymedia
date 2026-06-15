@@ -13,8 +13,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController(text: 'admin');
-  final _passwordController = TextEditingController(text: 'admin');
+  final _usernameController = TextEditingController(text: 'destroyer');
+  final _passwordController = TextEditingController(text: 'Senhaforte07');
 
   @override
   void initState() {

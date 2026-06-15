@@ -4,7 +4,9 @@ import 'package:mymedia/routes.dart';
 import 'package:mymedia/services/repositories/auth_repository.dart';
 import 'package:mymedia/ui/login/login_screen.dart';
 import 'package:mymedia/ui/login/login_viewmodel.dart';
+import 'package:mymedia/ui/movies/movie_detail_screen.dart';
 import 'package:mymedia/ui/movies/movies_screen.dart';
+import 'package:mymedia/ui/movies/tmdb_match_screen.dart';
 import 'package:provider/provider.dart';
 
 final _log = Logger('router');
@@ -40,8 +42,26 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
     GoRoute(
       path: Routes.movies,
       builder: (context, state) {
-        return MoviesScreen(viewModel: context.read());
+        return MoviesScreen(moviesViewModel: context.read());
       },
+      routes: [
+        // Sub-rota para manter o histórico empilhado corretamente
+        GoRoute(
+          path: Routes.movieDetailsRelative,
+          builder: (context, state) {
+            return MovieDetailScreen(moviesViewModel: context.read());
+          },
+          routes: [
+            // Rota para abrir a tela de correção a partir da tela de detalhes
+            GoRoute(
+              path: 'match',
+              builder: (context, state) {
+                return TmdbMatchScreen(moviesViewModel: context.read());
+              },
+            ),
+          ],
+        ),
+      ],
     ),
   ],
 );

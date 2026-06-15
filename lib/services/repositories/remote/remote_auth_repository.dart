@@ -9,7 +9,10 @@ class RemoteAuthRepository extends AuthRepository {
   RemoteAuthRepository({
     required this._remoteApi,
     required this._sharedPreferencesService,
-  });
+  }) {
+    _remoteApi.authHeaderProvider = _authHeaderProvider;
+    _remoteApi.notAuthorizedCallback = _notAuthorizedCallback;
+  }
 
   final RemoteApi _remoteApi;
   final SharedPreferencesService _sharedPreferencesService;
@@ -76,5 +79,18 @@ class RemoteAuthRepository extends AuthRepository {
       _log.warning('Erro ao realizar logout: $e');
       return Result.failure(e);
     }
+  }
+
+  Future<String?> _authHeaderProvider() async =>
+      _authToken != null ? 'Bearer $_authToken' : null;
+
+  Future<void> _notAuthorizedCallback() async {
+    _log.info('Requisição sem autorização');
+
+    // await _sharedPreferencesService.saveToken(null);
+
+    // Limpa os dados em memória volatil
+    _authToken = null;
+    _isAuthenticated = false;
   }
 }
