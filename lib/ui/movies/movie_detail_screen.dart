@@ -250,7 +250,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         posterWidget,
-                        const SizedBox(height: 32),
+                        const SizedBox(height: 32, width: double.infinity),
                         infoWidget,
                       ],
                     ),

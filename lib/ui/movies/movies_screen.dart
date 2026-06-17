@@ -4,7 +4,6 @@ import 'package:mymedia/domain/models/movie.dart';
 import 'package:mymedia/routes.dart';
 import 'package:mymedia/ui/core/ui/placeholder_movie_poster.dart';
 import 'package:mymedia/ui/movies/movies_viewmodel.dart';
-import 'package:mymedia/utils/result.dart';
 
 class MoviesScreen extends StatefulWidget {
   const MoviesScreen({super.key, required this.moviesViewModel});
