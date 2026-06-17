@@ -5,19 +5,12 @@ import 'package:mymedia/routes.dart';
 import 'package:mymedia/ui/core/ui/placeholder_movie_poster.dart';
 import 'package:mymedia/ui/movies/movies_viewmodel.dart';
 
-class MovieDetailScreen extends StatefulWidget {
+class MovieDetailScreen extends StatelessWidget {
   const MovieDetailScreen({super.key, required this.moviesViewModel});
 
   final MoviesViewModel moviesViewModel;
 
-  @override
-  State<MovieDetailScreen> createState() => _MovieDetailScreenState();
-}
-
-class _MovieDetailScreenState extends State<MovieDetailScreen> {
-  bool _isPlayFocused = false;
-
-  Movie get movie => widget.moviesViewModel.selectedMovie;
+  Movie get movie => moviesViewModel.selectedMovie;
 
   @override
   Widget build(BuildContext context) {
@@ -56,10 +49,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                // Define se a tela atual se comporta como Mobile/Vertical
                 final isMobile = constraints.maxWidth < 720;
 
-                // Componente isolado do Pôster para reaproveitamento
                 final posterWidget = ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: SizedBox(
@@ -67,15 +58,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     child: movie.posterUrl != null
                         ? Image.network(movie.posterUrl!, fit: BoxFit.cover)
                         : AspectRatio(
-                            aspectRatio:
-                                2 /
-                                3, // Perfeito para o formato de poster na vertical
+                            aspectRatio: 2 / 3,
                             child: PlaceholderMoviePoster(),
                           ),
                   ),
                 );
 
-                // Componente isolado dos Textos, Metadados e Botões
                 final infoWidget = Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisSize: MainAxisSize.min,
@@ -161,87 +149,105 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ),
                     const SizedBox(height: 40),
 
-                    // Bloco de Ações (Botões) adaptável para quebras de linha em telas pequenas
                     Wrap(
                       spacing: 16,
                       runSpacing: 16,
                       children: [
-                        Focus(
-                          autofocus: true,
-                          onFocusChange: (hasFocus) =>
-                              setState(() => _isPlayFocused = hasFocus),
-                          onKeyEvent: (node, event) {
-                            if (_isPlayFocused &&
-                                event.logicalKey.keyLabel == 'Select') {
-                              debugPrint(
-                                'Iniciando o player para: ${movie.filePath}',
-                              );
-                              return KeyEventResult.handled;
-                            }
-                            return KeyEventResult.ignored;
+                        // Botão Principal: Assistir Filme (Filled Button M3)
+                        FilledButton.icon(
+                          autofocus: true, // Auto-foco na abertura (TV)
+                          onPressed: () {
+                            debugPrint(
+                              'Iniciando o player para: ${movie.filePath}',
+                            );
                           },
-                          child: GestureDetector(
-                            onTap: () =>
-                                debugPrint('Iniciando player no clique/touch'),
-                            child: AnimatedContainer(
-                              duration: const Duration(milliseconds: 200),
-                              padding: const EdgeInsets.symmetric(
+                          icon: const Icon(Icons.play_arrow),
+                          label: const Text('Assistir Filme'),
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.resolveWith((
+                              states,
+                            ) {
+                              if (states.contains(WidgetState.focused)) {
+                                return Colors.blueAccent;
+                              }
+                              return Colors
+                                  .white; // Fundo padrão M3 invertido para destaque cinematográfico
+                            }),
+                            foregroundColor: WidgetStateProperty.resolveWith((
+                              states,
+                            ) {
+                              if (states.contains(WidgetState.focused)) {
+                                return Colors.white;
+                              }
+                              return Colors.black;
+                            }),
+                            padding: WidgetStateProperty.all(
+                              const EdgeInsets.symmetric(
                                 horizontal: 32,
-                                vertical: 16,
+                                vertical: 20,
                               ),
-                              decoration: BoxDecoration(
-                                color: _isPlayFocused
-                                    ? Colors.blueAccent
-                                    : Colors.white,
+                            ),
+                            shape: WidgetStateProperty.all(
+                              RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                boxShadow: _isPlayFocused
-                                    ? [
-                                        BoxShadow(
-                                          color: Colors.blueAccent.withAlpha(
-                                            128,
-                                          ),
-                                          blurRadius: 15,
-                                          offset: const Offset(0, 5),
-                                        ),
-                                      ]
-                                    : [],
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.play_arrow,
-                                    color: _isPlayFocused
-                                        ? Colors.white
-                                        : Colors.black,
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    'Assistir Filme',
-                                    style: TextStyle(
-                                      color: _isPlayFocused
-                                          ? Colors.white
-                                          : Colors.black,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
                               ),
                             ),
                           ),
                         ),
-                        _FixMetadataButton(
+
+                        // Botão Secundário: Corrigir Informações (Outlined Button M3)
+                        OutlinedButton.icon(
                           onPressed: () {
                             context.push(Routes.movieDetailsMatch);
                           },
+                          icon: const Icon(Icons.edit_note),
+                          label: const Text('Corrigir Informações'),
+                          style: ButtonStyle(
+                            backgroundColor: WidgetStateProperty.resolveWith((
+                              states,
+                            ) {
+                              if (states.contains(WidgetState.focused)) {
+                                return Colors.amber;
+                              }
+                              return const Color(0xFF1F232C);
+                            }),
+                            foregroundColor: WidgetStateProperty.resolveWith((
+                              states,
+                            ) {
+                              if (states.contains(WidgetState.focused)) {
+                                return Colors.black;
+                              }
+                              return Colors.amber;
+                            }),
+                            side: WidgetStateProperty.resolveWith((states) {
+                              if (states.contains(WidgetState.focused)) {
+                                return const BorderSide(
+                                  color: Colors.white,
+                                  width: 2,
+                                );
+                              }
+                              return const BorderSide(
+                                color: Colors.transparent,
+                              );
+                            }),
+                            padding: WidgetStateProperty.all(
+                              const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 20,
+                              ),
+                            ),
+                            shape: WidgetStateProperty.all(
+                              RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                          ),
                         ),
                       ],
                     ),
                   ],
                 );
 
-                // ESTRATÉGIA DE RENDERIZAÇÃO RESPONSIVA
                 if (isMobile) {
                   return SingleChildScrollView(
                     physics: const BouncingScrollPhysics(),
@@ -263,8 +269,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       children: [
                         posterWidget,
                         const SizedBox(width: 48),
-                        // CORREÇÃO AQUI: Envolvemos com SingleChildScrollView + IntrinsicHeight
-                        // para permitir rolagem vertical caso a sinopse empurre os botões para fora da TV
                         Expanded(
                           child: SingleChildScrollView(
                             physics: const BouncingScrollPhysics(),
@@ -279,7 +283,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
             ),
           ),
 
-          // Botão Voltar fixo no topo da Stack (Garante acessibilidade independente do scroll)
+          // Botão Voltar fixo no topo da Stack
           Positioned(
             top: 16,
             left: 16,
@@ -289,64 +293,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FixMetadataButton extends StatefulWidget {
-  const _FixMetadataButton({required this.onPressed});
-  final VoidCallback onPressed;
-
-  @override
-  State<_FixMetadataButton> createState() => _FixMetadataButtonState();
-}
-
-class _FixMetadataButtonState extends State<_FixMetadataButton> {
-  bool _isFocused = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return Focus(
-      onFocusChange: (hasFocus) => setState(() => _isFocused = hasFocus),
-      onKeyEvent: (node, event) {
-        if (_isFocused && event.logicalKey.keyLabel == 'Select') {
-          widget.onPressed();
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.ignored;
-      },
-      child: GestureDetector(
-        onTap: widget.onPressed,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          decoration: BoxDecoration(
-            color: _isFocused ? Colors.amber : const Color(0xFF1F232C),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: _isFocused ? Colors.white : Colors.transparent,
-              width: 2,
-            ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                Icons.edit_note,
-                color: _isFocused ? Colors.black : Colors.amber,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'Corrigir Informações',
-                style: TextStyle(
-                  color: _isFocused ? Colors.black : Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
