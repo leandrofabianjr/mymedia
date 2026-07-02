@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mymedia/domain/models/movie.dart';
@@ -153,13 +156,45 @@ class MovieDetailScreen extends StatelessWidget {
                       spacing: 16,
                       runSpacing: 16,
                       children: [
-                        // Botão Principal: Assistir Filme (Filled Button M3)
                         FilledButton.icon(
-                          autofocus: true, // Auto-foco na abertura (TV)
-                          onPressed: () {
+                          autofocus: true,
+                          onPressed: () async {
                             debugPrint(
-                              'Iniciando o player para: ${movie.filePath}',
+                              'Stream URL enviado ao VLC: ${movie.urlStream}',
                             );
+
+                            if (Platform.isAndroid) {
+                              try {
+                                final intent = AndroidIntent(
+                                  action: 'action_view',
+                                  data: movie.urlStream,
+                                  type: 'video/*',
+                                  package: 'org.videolan.vlc',
+                                );
+                                await intent.launch();
+                              } catch (e) {
+                                debugPrint('Erro ao disparar o VLC: $e');
+                                if (context.mounted) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Certifique-se de que o VLC está instalado.',
+                                      ),
+                                    ),
+                                  );
+                                }
+                              }
+                            } else {
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Disponível apenas para Android.',
+                                    ),
+                                  ),
+                                );
+                              }
+                            }
                           },
                           icon: const Icon(Icons.play_arrow),
                           label: const Text('Assistir Filme'),

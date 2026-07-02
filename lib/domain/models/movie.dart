@@ -4,7 +4,7 @@ class Movie {
   final int id;
   final String title;
   final String fileName;
-  final String filePath;
+  final String urlStream;
   final String? posterUrl;
   final int? year;
   final String extension;
@@ -16,7 +16,7 @@ class Movie {
     required this.id,
     required this.title,
     required this.fileName,
-    required this.filePath,
+    required this.urlStream,
     this.posterUrl,
     this.year,
     required this.extension,

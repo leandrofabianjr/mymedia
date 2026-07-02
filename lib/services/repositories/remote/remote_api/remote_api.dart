@@ -140,7 +140,7 @@ class RemoteApi {
         );
       } else {
         return const Result.failure(
-          HttpException("Erro ao buscar dados no TMDB"),
+          HttpException("Erro ao buscar metadados do filme"),
         );
       }
     } on Exception catch (e) {

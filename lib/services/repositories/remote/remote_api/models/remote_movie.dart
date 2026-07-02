@@ -7,7 +7,7 @@ class RemoteMovie {
         id: json['id'],
         title: json['title'],
         fileName: json['file_name'],
-        filePath: json['file_path'],
+        urlStream: json['url_stream'],
         posterUrl: json['poster_url'],
         year: json['year'],
         extension: json['extension'],
