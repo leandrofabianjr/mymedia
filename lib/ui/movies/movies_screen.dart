@@ -25,7 +25,15 @@ class _MoviesScreenState extends State<MoviesScreen> {
   Widget build(BuildContext context) {
     final fetchMovies = widget.moviesViewModel.fetchMovies;
     return Scaffold(
-      appBar: AppBar(title: const Text('Minha Biblioteca de Filmes')),
+      appBar: AppBar(
+        title: const Text('Minha Biblioteca de Filmes'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => widget.moviesViewModel.logout.execute(),
+          ),
+        ],
+      ),
       body: ListenableBuilder(
         listenable: widget.moviesViewModel,
         child: const Center(child: CircularProgressIndicator()),

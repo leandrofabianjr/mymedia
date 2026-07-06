@@ -5,8 +5,10 @@ import 'package:mymedia/services/repositories/auth_repository.dart';
 import 'package:mymedia/services/repositories/remote/remote_api/remote_api.dart';
 import 'package:mymedia/services/repositories/remote/remote_auth_repository.dart';
 import 'package:mymedia/services/repositories/remote/remote_movies_repository.dart';
+import 'package:mymedia/services/repositories/settings_repository.dart';
 import 'package:mymedia/services/shared_preferences_service.dart';
 import 'package:mymedia/ui/movies/movies_viewmodel.dart';
+import 'package:mymedia/ui/settings/settings_viewmodel.dart';
 import 'package:provider/provider.dart';
 import 'package:provider/single_child_widget.dart';
 
@@ -17,8 +19,12 @@ void main() {
 }
 
 List<SingleChildWidget> get providers {
-  final remoteApi = RemoteApi();
   final sharedPreferencesService = SharedPreferencesService();
+  final remoteApi = RemoteApi();
+  final settingsRepository = SettingsRepository(
+    remoteApi: remoteApi,
+    sharedPreferencesService: sharedPreferencesService,
+  );
   final authRepository = RemoteAuthRepository(
     remoteApi: remoteApi,
     sharedPreferencesService: sharedPreferencesService,
@@ -27,7 +33,13 @@ List<SingleChildWidget> get providers {
   return [
     ChangeNotifierProvider.value(value: authRepository as AuthRepository),
     ChangeNotifierProvider.value(
-      value: MoviesViewModel(moviesRepository: moviesRepository),
+      value: MoviesViewModel(
+        moviesRepository: moviesRepository,
+        authRepository: authRepository,
+      ),
+    ),
+    ChangeNotifierProvider.value(
+      value: SettingsViewModel(settingsRepository: settingsRepository),
     ),
   ];
 }

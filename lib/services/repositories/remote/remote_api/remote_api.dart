@@ -12,13 +12,7 @@ export 'errors.dart';
 export 'models/remote_auth_token.dart';
 
 typedef AuthHeaderProvider = Future<String?> Function();
-
-const String _apiHost = String.fromEnvironment(
-  'API_HOST',
-  defaultValue: '127.0.0.1',
-);
-
-const int _apiPort = int.fromEnvironment('API_PORT', defaultValue: 80);
+typedef ApiUrlProvider = Future<(String, int)> Function();
 
 class RemoteApi {
   RemoteApi({HttpClient Function()? clientFactory})
@@ -29,6 +23,7 @@ class RemoteApi {
   final _log = Logger('RemoteApi');
 
   AuthHeaderProvider? _authHeaderProvider;
+  ApiUrlProvider? _apiUrlProvider;
 
   void Function()? _notAuthorizedCallback;
 
@@ -40,6 +35,10 @@ class RemoteApi {
     _authHeaderProvider = authHeaderProvider;
   }
 
+  set apiUrlProvider(ApiUrlProvider apiUrlProvider) {
+    _apiUrlProvider = apiUrlProvider;
+  }
+
   Future<void> _authHeader(HttpHeaders headers) async {
     final header = await _authHeaderProvider?.call();
     _log.info('Auth header: $header');
@@ -49,7 +48,13 @@ class RemoteApi {
   }
 
   Future<HttpClientRequest> get(HttpClient client, String path) async {
-    final request = await client.get(_apiHost, _apiPort, path);
+    final (apiHost, apiPort) = await _apiUrlProvider?.call() ?? ('', 0);
+    if (apiHost.isEmpty || apiPort == 0) {
+      _log.severe('API URL não configurada');
+      throw Exception('API URL não configurada');
+    }
+    _log.finer('GET request to $apiHost:$apiPort$path');
+    final request = await client.get(apiHost, apiPort, path);
     await _authHeader(request.headers);
     return request;
   }
@@ -59,8 +64,13 @@ class RemoteApi {
     client.connectionTimeout = const Duration(seconds: 5);
 
     _log.finer('Realizando login');
+    final (apiHost, apiPort) = await _apiUrlProvider?.call() ?? ('', 0);
+    if (apiHost.isEmpty || apiPort == 0) {
+      _log.severe('API URL não configurada');
+      throw Exception('API URL não configurada');
+    }
     try {
-      final request = await client.post(_apiHost, _apiPort, '/auth/token');
+      final request = await client.post(apiHost, apiPort, '/auth/token');
 
       request.headers.contentType = ContentType(
         'application',
@@ -156,10 +166,15 @@ class RemoteApi {
   ) async {
     final client = _clientFactory();
     client.connectionTimeout = const Duration(seconds: 5);
+    final (apiHost, apiPort) = await _apiUrlProvider?.call() ?? ('', 0);
+    if (apiHost.isEmpty || apiPort == 0) {
+      _log.severe('API URL não configurada');
+      throw Exception('API URL não configurada');
+    }
     try {
       final request = await client.put(
-        _apiHost,
-        _apiPort,
+        apiHost,
+        apiPort,
         '/movies/$movieId/metadata',
       );
       await _authHeader(request.headers);

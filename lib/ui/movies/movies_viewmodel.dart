@@ -1,28 +1,37 @@
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
 import 'package:mymedia/domain/models/movie.dart';
+import 'package:mymedia/services/repositories/auth_repository.dart';
 import 'package:mymedia/services/repositories/movies_repository.dart';
 import 'package:mymedia/utils/command.dart';
 import 'package:mymedia/utils/result.dart';
 
 class MoviesViewModel extends ChangeNotifier {
-  MoviesViewModel({required this._moviesRepository}) {
+  MoviesViewModel({
+    required this._moviesRepository,
+    required this._authRepository,
+  }) {
     fetchMovies = Command0(_fetchMovies);
 
     searchMovieMetadata = Command1(_searchMovieMetadata);
 
     importMetadata = Command2(_importMetadata);
+
+    logout = Command0(_logout);
   }
 
   final _log = Logger('MoviesViewModel');
 
   final MoviesRepository _moviesRepository;
+  final AuthRepository _authRepository;
 
   late final Command0<List<Movie>> fetchMovies;
 
   late final Command1<List<MovieTmdbData>, String> searchMovieMetadata;
 
   late final Command2<void, int, MovieTmdbData> importMetadata;
+
+  late final Command0 logout;
 
   List<Movie> _movies = [];
   List<Movie> get movies => _movies;
@@ -89,6 +98,16 @@ class MoviesViewModel extends ChangeNotifier {
       notifyListeners();
     }
 
+    return result;
+  }
+
+  Future<Result<void>> _logout() async {
+    final result = await _authRepository.logout();
+    if (result.isSuccess) {
+      _movies.clear();
+      _selectedMovie = null;
+      notifyListeners();
+    }
     return result;
   }
 }

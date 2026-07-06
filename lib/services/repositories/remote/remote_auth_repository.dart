@@ -78,6 +78,8 @@ class RemoteAuthRepository extends AuthRepository {
     } catch (e) {
       _log.warning('Erro ao realizar logout: $e');
       return Result.failure(e);
+    } finally {
+      notifyListeners();
     }
   }
 

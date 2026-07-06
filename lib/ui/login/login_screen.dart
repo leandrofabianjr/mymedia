@@ -13,8 +13,12 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _usernameController = TextEditingController(text: 'destroyer');
-  final _passwordController = TextEditingController(text: 'Senhaforte07');
+  final _usernameController = TextEditingController(
+    text: const String.fromEnvironment('USERNAME', defaultValue: ''),
+  );
+  final _passwordController = TextEditingController(
+    text: const String.fromEnvironment('PASSWORD', defaultValue: ''),
+  );
 
   @override
   void initState() {
@@ -40,6 +44,14 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings),
+            onPressed: () => context.push(Routes.settings),
+          ),
+        ],
+      ),
       body: Center(
         child: Container(
           constraints: const BoxConstraints(maxWidth: 400),
@@ -49,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const Text(
-                'DESTROYERSRV',
+                'MYMEDIA',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
               ),

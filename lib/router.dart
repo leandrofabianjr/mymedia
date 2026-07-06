@@ -7,6 +7,7 @@ import 'package:mymedia/ui/login/login_viewmodel.dart';
 import 'package:mymedia/ui/movies/movie_detail_screen.dart';
 import 'package:mymedia/ui/movies/movies_screen.dart';
 import 'package:mymedia/ui/movies/tmdb_match_screen.dart';
+import 'package:mymedia/ui/settings/settings_screen.dart';
 import 'package:provider/provider.dart';
 
 final _log = Logger('router');
@@ -15,6 +16,10 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
   initialLocation: Routes.movies,
   debugLogDiagnostics: true,
   redirect: (context, state) async {
+    if (state.matchedLocation == Routes.settings) {
+      _log.finer('Acesso à tela de configurações, sem redirecionamento');
+      return null;
+    }
     final loggedIn = await context.read<AuthRepository>().isAuthenticated;
     final loggingIn = state.matchedLocation == Routes.login;
     if (!loggedIn) {
@@ -37,6 +42,12 @@ GoRouter router(AuthRepository authRepository) => GoRouter(
         return LoginScreen(
           viewModel: LoginViewModel(authRepository: context.read()),
         );
+      },
+    ),
+    GoRoute(
+      path: Routes.settings,
+      builder: (context, state) {
+        return SettingsScreen(settingsViewModel: context.read());
       },
     ),
     GoRoute(
