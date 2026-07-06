@@ -66,7 +66,6 @@ class _MoviesScreenState extends State<MoviesScreen> {
             );
           }
 
-          // Grid responsivo e otimizado para TV
           return GridView.builder(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -108,62 +107,64 @@ class _MovieGridItem extends StatefulWidget {
 class _MovieGridItemState extends State<_MovieGridItem> {
   @override
   Widget build(BuildContext context) {
-    // O widget Focus captura a navegação do controle remoto da TV
-    return GestureDetector(
+    return InkWell(
       onTap: () {
         widget.onSelect(widget.movie);
       },
-
-      // AnimatedContainer cria a transição suave de escala e brilho ao navegar
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // 1. Área do Poster com cantos arredondados
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                width: double.infinity,
-                child: widget.movie.posterUrl != null
-                    ? Image.network(
-                        widget.movie.posterUrl!,
-                        fit: BoxFit.cover,
-                        errorBuilder: PlaceholderMoviePoster.errorBuilder,
-                      )
-                    : const PlaceholderMoviePoster(),
+      borderRadius: BorderRadius.circular(12),
+      focusColor: Theme.of(context).colorScheme.primaryContainer.withAlpha(60),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 1. Área do Poster com cantos arredondados
+            Expanded(
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  width: double.infinity,
+                  child: widget.movie.posterUrl != null
+                      ? Image.network(
+                          widget.movie.posterUrl!,
+                          fit: BoxFit.cover,
+                          errorBuilder: PlaceholderMoviePoster.errorBuilder,
+                        )
+                      : const PlaceholderMoviePoster(),
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-          // 2. Título e Ano do filme embaixo do card
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.movie.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Theme.of(context).colorScheme.onSurface,
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.movie.title,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  widget.movie.year?.toString() ?? 'N/A',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).colorScheme.secondary,
+                  const SizedBox(height: 2),
+                  Text(
+                    widget.movie.year?.toString() ?? 'N/A',
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Theme.of(context).colorScheme.secondary,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
