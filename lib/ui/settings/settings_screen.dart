@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:mymedia/ui/settings/settings_viewmodel.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -18,6 +19,117 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void initState() {
     widget.settingsViewModel.init();
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _serverUrlController.dispose();
+    _serverPortController.dispose();
+    super.dispose();
+  }
+
+  void _openEditDialog() {
+    _serverUrlController.text = widget.settingsViewModel.serverUrl;
+    _serverPortController.text = widget.settingsViewModel.serverPort.toString();
+
+    // 1. Cria o nó de foco para o botão Salvar
+    final FocusNode salvarFocusNode = FocusNode();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('URL do servidor'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Focus(
+              onKeyEvent: (node, event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                  // Move o foco nativamente para o próximo campo abaixo (Porta)
+                  FocusScope.of(context).nextFocus();
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: TextField(
+                controller: _serverUrlController,
+                autofocus: true,
+                textInputAction: TextInputAction.next,
+                decoration: const InputDecoration(
+                  labelText: 'URL (ex: 192.168.0.177)',
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            // 2. Envolvemos o campo da Porta em um Focus para interceptar a seta para baixo
+            Focus(
+              onKeyEvent: (node, event) {
+                if (event is KeyDownEvent &&
+                    event.logicalKey == LogicalKeyboardKey.arrowDown) {
+                  salvarFocusNode
+                      .requestFocus(); // Força o foco a ir para o botão Salvar
+                  return KeyEventResult.handled;
+                }
+                return KeyEventResult.ignored;
+              },
+              child: TextField(
+                controller: _serverPortController,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                decoration: const InputDecoration(labelText: 'Porta'),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.focused)) {
+                  return Theme.of(
+                    context,
+                  ).colorScheme.errorContainer.withValues(alpha: 0.5);
+                }
+                return Colors.transparent;
+              }),
+            ),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            focusNode: salvarFocusNode, // 3. Vincula o nó de foco aqui
+            onPressed: () {
+              widget.settingsViewModel.saveServerUrl(
+                _serverUrlController.text,
+                int.tryParse(_serverPortController.text) ?? 80,
+              );
+              // É boa prática dar dispose no node local quando o diálogo fecha
+              salvarFocusNode.dispose();
+              Navigator.pop(context);
+            },
+            style: ButtonStyle(
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.focused)) {
+                  return Colors.blueAccent;
+                }
+                return Colors.transparent;
+              }),
+              foregroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.focused)) {
+                  return Colors.white;
+                }
+                return Theme.of(context).colorScheme.primary;
+              }),
+            ),
+            child: const Text('Salvar'),
+          ),
+        ],
+      ),
+    ).then((_) {
+      // Garante que o node seja destruído se o usuário fechar o diálogo clicando fora ou no voltar da TV
+      salvarFocusNode.dispose();
+    });
   }
 
   @override
@@ -46,43 +158,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   }
                 },
               ),
+              // Feedback de foco no botão de edição do próprio ListTile
               trailing: IconButton(
                 icon: const Icon(Icons.edit),
-                onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) => AlertDialog(
-                      title: const Text('URL do servidor'),
-                      content: Column(
-                        children: <Widget>[
-                          TextField(
-                            decoration: const InputDecoration(labelText: 'URL'),
-                            controller: _serverUrlController,
-                          ),
-                          TextField(
-                            decoration: const InputDecoration(
-                              labelText: 'Porta',
-                            ),
-                            controller: _serverPortController,
-                            keyboardType: TextInputType.number,
-                          ),
-                        ],
-                      ),
-                      actions: [
-                        TextButton(
-                          child: const Text('Salvar'),
-                          onPressed: () {
-                            widget.settingsViewModel.saveServerUrl(
-                              _serverUrlController.text,
-                              int.tryParse(_serverPortController.text) ?? 80,
-                            );
-                            Navigator.pop(context);
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                },
+                style: ButtonStyle(
+                  backgroundColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.focused)) {
+                      return Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer.withValues(alpha: 0.5);
+                    }
+                    return Colors.transparent;
+                  }),
+                  iconColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.focused)) {
+                      return Colors.blueAccent;
+                    }
+                    return Theme.of(context).colorScheme.onSurface;
+                  }),
+                ),
+                onPressed: _openEditDialog,
               ),
             ),
           ],
