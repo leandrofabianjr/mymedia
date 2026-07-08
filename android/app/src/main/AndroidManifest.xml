@@ -1,8 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Declara que o app usa a interface de TV -->
+    <uses-feature android:name="android.software.leanback" android:required="false" />
+    <!-- Declara que o app funciona com controle remoto (não exige touch screen) -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:label="mymedia"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:banner="@drawable/tv_banner"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -40,6 +47,13 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
+    <queries>
+        <package android:name="org.videolan.vlc" />
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="video/*" />
         </intent>
     </queries>
 </manifest>
