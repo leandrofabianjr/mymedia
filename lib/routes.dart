@@ -10,4 +10,6 @@ abstract final class Routes {
   static const login = '/login';
 
   static const settings = '/settings';
+
+  static String get nouser => '/nouser';
 }
